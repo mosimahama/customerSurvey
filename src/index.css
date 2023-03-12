@@ -112,3 +112,32 @@ button svg {
   display: flex;
   justify-content: space-around;
 }
+
+ .buttonStyle{
+  width: "10rem";
+  font-size: "1.5rem";
+  height: "2rem";
+  padding: "5px";
+  border-radius: "10px";
+  background-color: "green";
+  color: "White";
+  border: "2px solid yellow";
+};
+.divStyle {
+  display: "flex";
+  flex-direction: "row";
+  position: "absolute";
+  right: "0px";
+  bottom: "0px";
+  /* padding: "1rem"; */
+};
+.confirmButtonStyle{
+  width: "5rem";
+  height: "1.5rem";
+  font-size: "1rem";
+  background-color: "grey";
+  color: "black";
+  margin: "5px";
+  border-radius: "10px";
+  border: "1px solid black";
+};

@@ -1,20 +1,20 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import qBank from "../question";
-import { useNavigate } from "react-router-dom";
+import DialogBox from "./Dialog";
+import lodash from "lodash";
+
 function Survey() {
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [showScore, setShowScore] = useState(false);
-    const [userInput, setUserInput] = useState()
-
-    const navigate = useNavigate();
-    const handleAnswerOptionClick = (e) => {
-
+    const [userInput, setUserInput] = useState({});
+    const [finalData, setFinalData] = useState();
+    const [isShown, setIsShown] = useState(false);
+   
+    const handleNextButtonClick = (e) => {
+       
         const nextQuestion = currentQuestion + 1;
         if (nextQuestion < qBank.length) {
             setCurrentQuestion(nextQuestion);
-        } else {
-            setShowScore(true);
-        }
+        } 
         
     };
 
@@ -24,7 +24,7 @@ function Survey() {
         setUserInput((prev) => {
             return {
                 ...prev,
-                [qBank[currentQuestion].question]: value,
+                [qBank[currentQuestion].questionId]: value,
             }
         })
        
@@ -35,30 +35,16 @@ function Survey() {
             setCurrentQuestion(nextQuestion);
         }
     }
+
+
     let confirmBox = () => {
-
-        const status = window.confirm("Are you sure you want to submit!")
-
-        if (status) {
-            const userData = { ...userInput, status: "COMPLETED" }
-            localStorage.setItem(new Date().toString(), JSON.stringify(userData))
-            setShowScore(true)
-            setTimeout(() => {
-                navigate('/')
-            }, 5000)
-        }
-
+        setIsShown(true)
+        const userData = { ...userInput, status: "COMPLETED" };
+        setFinalData(userData);
     }
 
     return (
         <div className='app'>
-            {showScore ? (
-                <div className='score-section'>
-                    <p>Thank You for your response</p>	<p>Your Survey is Completed</p>
-
-                </div>
-            ) : (
-                <>
                     <div className='question-section'>
                         <div className='question-count'>
                             <span>Question {currentQuestion + 1}</span>/{qBank.length}
@@ -67,31 +53,34 @@ function Survey() {
                     </div>
                     {
 
-                        Array.isArray(qBank[currentQuestion].answers) &&
+                        lodash.isFinite(qBank[currentQuestion].answers) &&
                         <div className='answer-section'>
-                            {qBank[currentQuestion]?.answers?.map((answerOption, index) => (
-                                <div key={index + qBank[currentQuestion].question}>
-                                    <input type="radio" value={answerOption} name={qBank[currentQuestion].question} onChange={handleChange} />
-                                    <label htmlFor={qBank[currentQuestion].question}>{answerOption}</label></div>
+                            {[...Array(qBank[currentQuestion]?.answers)].map((index) => (
+                                <div key={qBank[currentQuestion].questionId + index}>
+                                    <input type="radio"   value={index+1} name={qBank[currentQuestion]?.questionId} onChange={handleChange} />
+                                    <label htmlFor={qBank[currentQuestion].question}>{index+1}</label></div>
 
                             ))}
+                           
                         </div>
                     }
                     {
 
-                        !Array.isArray(qBank[currentQuestion].answers) &&
+                        !lodash.isFinite(qBank[currentQuestion].answers) &&
                         <div className='answer-section'>
-                            <textarea style={{ color: "black" }} rows={3} type="text"  id={qBank[currentQuestion].question} placeholder="" onChange={handleChange} />
+                            <textarea style={{ color: "black" }} rows={3} type="text"  id={qBank[currentQuestion]?.question} placeholder="" onChange={handleChange} />
                         </div>
                     }
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
                         {(currentQuestion > 0) && <button style={{ width: "21%" }} onClick={handlePrevious}>Previous</button>}
-                        {(currentQuestion < qBank.length - 1) && <button onClick={handleAnswerOptionClick}>Next</button>}
-
-                        {(currentQuestion === qBank.length - 1) && <button style={{ width: "20%" }} onClick={confirmBox}>Submit</button>}
+                        {(currentQuestion < qBank.length - 1) && <button onClick={handleNextButtonClick}>Next</button>}
+                     
+                        {
+                        (currentQuestion === qBank.length - 1) && <button style={{ width: "20%" }} onClick={confirmBox}>Submit</button>
+                        
+                        }
+                        { isShown && <DialogBox data={finalData} /> }
                     </div>
-                </>
-            )}
         </div>
     );
 }
